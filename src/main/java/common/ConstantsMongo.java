@@ -11,4 +11,7 @@ public class ConstantsMongo {
 
 	public static String dbName = "test_mongodb"; //테스트 DB명
 	public static String colNm = "test_col"; //테스트 컬렉션명
+
+	public static String user_name = "test-user"; //인증모드 사용시 유저이름(ID)
+	public static String user_pwd = "test-user"; //인증모드 사용시 암호
 }
