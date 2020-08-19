@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
 
 /**
  *
@@ -53,8 +54,9 @@ public class UpdateSample {
 		//update 후
 		System.out.println("== Start update ==");
 
-		final Document setData = new Document("$set", new Document("value_2", 99));
-		targetCol.updateMany(new Document("name", "test_1"), setData);
+		//final Document setData = new Document("$set", new Document("value_2", 99));
+		Bson updateOperation = set("value_2", 101);
+		targetCol.updateMany(new Document("name", "test_1"), updateOperation);
 
 		System.out.println("after find reuslt =>>>\n");
 		System.out.println(targetCol.find(findFilter).first().toJson(prettyPrint));
