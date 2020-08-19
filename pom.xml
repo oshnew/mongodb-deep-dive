@@ -16,16 +16,51 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
 
-<!--        <mongodb-driver>4.0.4</mongodb-driver>-->
-        <mongodb-driver>3.4.3</mongodb-driver>
+        <mongodb-driver>4.0.4</mongodb-driver>
+        <!--        <mongodb-driver>3.4.3</mongodb-driver>-->
     </properties>
 
     <dependencies>
 
         <!-- MongoDB -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.mongodb</groupId>-->
+        <!--            <artifactId>mongo-java-driver</artifactId>-->
+        <!--            <version>${mongodb-driver}</version>-->
+        <!--        </dependency>-->
+
+        <!-- MongoDB -->
         <dependency>
             <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb-driver}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>mongodb-driver-core</artifactId>
+                    <groupId>org.mongodb</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>bson</artifactId>
+                    <groupId>org.mongodb</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-core</artifactId>
+            <version>${mongodb-driver}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>bson</artifactId>
+                    <groupId>org.mongodb</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
             <version>${mongodb-driver}</version>
         </dependency>
 

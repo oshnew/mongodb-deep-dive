@@ -1,9 +1,7 @@
 package sample.connection;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import common.ConstantsMongo;
-import common.MongoConnectionHelper;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -11,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 몽고DB 비 인증모드로 접속 및 기본 쿼리 수행 테스트
+ * 몽고DB 비 인증모드로 접속 및 기본 쿼리 수행 테스트 : java 드라이버 3.4사용 버전
  *
  * @author 엄승하
  */
@@ -22,16 +20,16 @@ public class MongoDBConnectWithNoAuth_Ver_3 {
 
 	public static void main(String[] args) {
 
-		MongoClient mongoClient = MongoConnectionHelper.getNewMongoClient();
-		//MongoClient mongoClient = new MongoClient(ConstantsMongo.dbPrimaryAddr);
-		mongoDB = mongoClient.getDatabase(ConstantsMongo.dbName);
-
-		saveDummyData(1000);
-
-		long resultCnt = mongoDB.getCollection(colNm).count();
-		System.out.println(String.format("\n'%s' 컬렉션에 저장된 row 수 ===> '%s'", colNm, resultCnt));
-
-		mongoClient.close(); //DB커넥션 반환
+		//		MongoClient mongoClient = MongoConnectionHelper.getNewMongoClient();
+		//		//MongoClient mongoClient = new MongoClient(ConstantsMongo.dbPrimaryAddr);
+		//		mongoDB = mongoClient.getDatabase(ConstantsMongo.dbName);
+		//
+		//		saveDummyData(1000);
+		//
+		//		long resultCnt = mongoDB.getCollection(colNm).count();
+		//		System.out.println(String.format("\n'%s' 컬렉션에 저장된 row 수 ===> '%s'", colNm, resultCnt));
+		//
+		//		mongoClient.close(); //DB커넥션 반환
 	}
 
 	/**
