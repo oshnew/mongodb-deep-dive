@@ -1,4 +1,4 @@
-package sample.crud;
+package sample.collectionManage;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClientSettings;
@@ -8,8 +8,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.result.InsertManyResult;
-import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.connection.ClusterSettings;
 import com.mongodb.connection.ConnectionPoolSettings;
 import common.ConstantsMongo;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.set;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -37,21 +37,23 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
  * @author 엄승하
  */
 @Slf4j
-public class FindWithPojoSample {
+public class CreateIndexSample {
 
 	private static JsonWriterSettings prettyPrint = JsonWriterSettings.builder().indent(true).build();
 	private static MongoClient mongoClient;
 
 	private static String dbNm = "test_log_1";
-	private static String colNm = "test_user";
+	private static String colNm = "test_index";
 
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class UserVO {
+	public static class MemberVO {
 
+		private String userId;
 		private String name;
 		private Integer age;
+		private List<String> topics;
 
 	}
 
@@ -61,37 +63,37 @@ public class FindWithPojoSample {
 
 		mongoClient = getNewMongoClient();
 		MongoDatabase targetDB = mongoClient.getDatabase(dbNm);
-		MongoCollection<UserVO> targetCol = targetDB.getCollection(colNm, UserVO.class);
 
-		targetCol.deleteMany(new Document()); //데이터 전체 삭제 후 시작(초기화)
+		targetDB.getCollection(colNm).drop(); //기존 컬렉션 drop후 실행
 
-		UserVO user = new UserVO("test_1", 10);
+		//인덱스 컬렉션 추가: 참고 https://mongodb.github.io/mongo-java-driver/4.0/driver/tutorials/indexes/
+		targetDB.createCollection(colNm);
+		//targetDB.getCollection(colNm).createIndex(new BasicDBObject("name", 1));
+
+		targetDB.getCollection(colNm).createIndex(Indexes.ascending("userId"), new IndexOptions().unique(true)); //유니크 인덱스
+		targetDB.getCollection(colNm).createIndex(Indexes.ascending("name"));
+		targetDB.getCollection(colNm).createIndex(Indexes.ascending("topics")); //멀티키 인덱스
+		targetDB.getCollection(colNm).createIndex(Indexes.ascending("age", "name")); //compound 인덱스
+
+		log.info("\n\n '{}' 컬렉션에 생성된 인덱스", colNm);
+
+		for (Document index : targetDB.getCollection(colNm).listIndexes()) {
+			System.out.println(index.toJson());
+		}
+
+		MongoCollection<MemberVO> targetCol = targetDB.getCollection(colNm, MemberVO.class);
 
 		//테스트 데이터 insert
-		InsertOneResult resultInsertOne = targetCol.insertOne(user);
-		log.info("\n\n\n1건 insert 결과 id:{}", resultInsertOne.getInsertedId());
+		MemberVO user1 = new MemberVO("id-1", "홍길동", 20, Arrays.asList("game", "music"));
+		MemberVO user2 = new MemberVO("id-2", "임꺽정", 30, Arrays.asList("sports"));
 
-		List<UserVO> userList = Arrays.asList(new UserVO("test_2", 20), new UserVO("test_3", 30));
-		InsertManyResult resultInsertMany = targetCol.insertMany(userList);
-		log.info("{}건 insert결과. insert 성공건수:{} | insert 결과 ids:{}", userList.size(), resultInsertMany.getInsertedIds().size(), resultInsertMany.getInsertedIds());
+		List<MemberVO> memberList = Arrays.asList(user1, user2);
+		InsertManyResult resultInsertMany = targetCol.insertMany(memberList);
+		log.info("{}건 insert결과. insert 성공건수:{} | insert 결과 ids:{}", memberList.size(), resultInsertMany.getInsertedIds().size(), resultInsertMany.getInsertedIds());
 
-		Bson findFilter = eq("name", "test_1");
+		Bson findFilter = eq("userId", "id-1");
 
-		//update 진행 전 find
-		System.out.println("find test reuslt =>>>");
-		System.out.println(targetCol.find(findFilter).first());
-
-		//update
-		System.out.println("== Start update ==");
-
-		//final Document setData = new Document("$set", new Document("value_2", 99));
-		Bson setData = set("age", 105);
-		targetCol.updateMany(new Document("name", "test_1"), setData);
-
-		System.out.println("after update find reuslt =>>>");
-		System.out.println(targetCol.find(findFilter).first());
-
-		System.out.println("== End update ==");
+		log.info("find test reuslt =>>>\n{}", targetCol.find(findFilter).first());
 
 		System.out.println(String.format("'%s' DB의 '%s'컬렉션에 저장된 row 수 ===> '%s'", targetDB.getName(), colNm, targetCol.countDocuments()));
 
