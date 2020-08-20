@@ -25,6 +25,7 @@ import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +65,15 @@ public class CreateIndexSample {
 		mongoClient = getNewMongoClient();
 		MongoDatabase targetDB = mongoClient.getDatabase(dbNm);
 
-		targetDB.getCollection(colNm).drop(); //기존 컬렉션 drop후 실행
+		LinkedHashSet<String> collectionNames = new LinkedHashSet<>();
+		for (String name : targetDB.listCollectionNames()) { //https://mongodb.github.io/mongo-java-driver/4.0/driver/tutorials/databases-collections/
+			collectionNames.add(name);
+		}
+
+		if (collectionNames.contains(colNm)) {
+			log.info("\n\n\n'{}' 컬렉션이 이미 존재해서 drop 선행\n\n", colNm);
+			targetDB.getCollection(colNm).drop(); //기존 컬렉션 drop후 실행
+		}
 
 		//인덱스 컬렉션 추가: 참고 https://mongodb.github.io/mongo-java-driver/4.0/driver/tutorials/indexes/
 		targetDB.createCollection(colNm);
